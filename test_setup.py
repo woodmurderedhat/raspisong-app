@@ -27,17 +27,19 @@ def test_imports():
             failed.append(module)
     
     # Test GPIO modules (may fail on non-RPi systems)
-    try:
-        import RPi.GPIO
-        print(f"  ✓ {'RPi.GPIO':15} - GPIO control")
-    except (ImportError, RuntimeError) as e:
-        print(f"  ⚠ {'RPi.GPIO':15} - GPIO control - Warning: {e}")
-    
+    # Note: RPi.GPIO is NOT compatible with Raspberry Pi 5
+    # This project uses gpiozero with lgpio backend instead
     try:
         import gpiozero
-        print(f"  ✓ {'gpiozero':15} - GPIO zero library")
+        print(f"  ✓ {'gpiozero':15} - GPIO zero library (Pi 5 compatible)")
     except (ImportError, RuntimeError) as e:
         print(f"  ⚠ {'gpiozero':15} - GPIO zero library - Warning: {e}")
+
+    try:
+        import lgpio
+        print(f"  ✓ {'lgpio':15} - lgpio backend for Pi 5")
+    except (ImportError, RuntimeError) as e:
+        print(f"  ⚠ {'lgpio':15} - lgpio backend - Warning: {e}")
     
     try:
         import spidev

@@ -1,72 +1,87 @@
-# Raspberry Pi 5 App
+# Raspisong App
 
-This project is a minimalistic application designed for the Raspberry Pi 5 that utilizes a Waveshare 2.8-inch LCD screen to display useful system information and act as a remote control for VLC media player. The application is modular, allowing for easy expansion and customization.
+A minimalistic media player application designed for the Raspberry Pi 5 that utilizes a Waveshare 2.8-inch LCD screen to display a touch-friendly media player interface. Control VLC media player with both touchscreen and physical GPIO buttons. The application is modular, allowing for easy expansion and customization.
 
 ## Features
 
-- Display system information such as CPU usage, memory usage, and disk space.
-- Control VLC media player with play, pause, and stop functionalities.
-- Exclusively use the Waveshare screen for displaying information and controls.
-- Maintain HDMI and other functionalities of the Raspberry Pi.
+- Touch-friendly media player UI with large buttons
+- Control VLC media player with play/pause, stop, next, and previous
+- Resistive touchscreen support with touch regions and sliders
+- 4 onboard GPIO buttons for physical control
+- System monitoring (CPU, memory, disk usage)
+- Exclusively use the Waveshare screen for displaying information and controls
+- Maintain HDMI and other functionalities of the Raspberry Pi
 
 ## Project Structure
 
 ```
-raspberry-pi-5-app
+raspisong-app
 ├── src
 │   ├── main.py               # Entry point of the application
 │   ├── display               # Module for managing the display
 │   │   ├── __init__.py
-│   │   ├── screen.py         # Screen management
-│   │   └── renderer.py       # Rendering text and graphics
+│   │   ├── screen.py         # Screen management (ILI9341 driver)
+│   │   ├── renderer.py       # MediaPlayerUI and legacy Renderer
+│   │   └── ui_components.py  # Button, Slider, ProgressBar components
 │   ├── system                # Module for system monitoring
 │   │   ├── __init__.py
 │   │   ├── monitor.py        # Gathers system information
 │   │   └── stats.py          # Utility functions for stats
 │   ├── vlc                   # Module for VLC control
 │   │   ├── __init__.py
-│   │   ├── controller.py     # Manages VLC commands
-│   │   └── player.py         # Interfaces with VLC media player
+│   │   ├── controller.py     # Manages VLC commands and playlists
+│   │   └── player.py         # Simple VLC media player wrapper
 │   ├── input                 # Module for handling input
 │   │   ├── __init__.py
-│   │   └── gpio.py           # GPIO input handling
+│   │   ├── gpio.py           # GPIO button input handling
+│   │   └── touch.py          # Touchscreen input handling (ADS7846)
 │   └── config                # Module for configuration settings
 │       ├── __init__.py
 │       └── settings.py       # Configuration settings
 ├── requirements.txt          # Python dependencies
 ├── config.yaml               # Configuration settings in YAML format
+├── install.sh                # Automated installation script
+├── test_setup.py             # Setup verification script
+├── rpi-lcd-monitor.service   # Systemd service file
+├── WIRING.md                 # Detailed hardware wiring guide
 └── README.md                 # Project documentation
 ```
 
 ## Hardware Requirements
 
 - Raspberry Pi 5 (8GB RAM recommended)
-- Waveshare 2.8" LCD (A) display
-- GPIO buttons (5 buttons for full control)
-- Jumper wires for connections
+- Waveshare 2.8" LCD (A) display (Rev2.0 or Rev2.1)
+- No additional wiring needed - the LCD has 4 onboard buttons
 
 ## Hardware Setup
 
 ### Waveshare 2.8" LCD Connection
 
-The display connects via SPI interface. The pins are pre-configured in the code:
-- RST: GPIO 27
-- DC: GPIO 25
-- BL (Backlight): GPIO 24
-- CS: GPIO 8 (CE0)
-- MOSI: GPIO 10
-- SCLK: GPIO 11
+The display connects directly via a 26-pin header to pins 1-26 of the Raspberry Pi GPIO. The pins are pre-configured in the code:
 
-### GPIO Button Connections
+- **RST**: GPIO 13 (Physical Pin 33)
+- **DC/RS**: GPIO 15 (Physical Pin 10)
+- **BL (Backlight)**: GPIO 18 (Physical Pin 12) - PWM capable
+- **LCD CS**: GPIO 8 (Physical Pin 24) - CE0
+- **Touch CS**: GPIO 7 (Physical Pin 26) - CE1
+- **MOSI**: GPIO 10 (Physical Pin 19)
+- **MISO**: GPIO 9 (Physical Pin 21)
+- **SCLK**: GPIO 11 (Physical Pin 23)
 
-Default button configuration (can be changed in `config.yaml`):
-- **Play**: GPIO 17
-- **Pause**: GPIO 27
-- **Stop**: GPIO 22
-- **Next**: GPIO 23
-- **Previous**: GPIO 24
+See [WIRING.md](WIRING.md) for detailed pinout and wiring diagrams.
 
-Connect each button between the GPIO pin and GND.
+### GPIO Button Configuration (Onboard Buttons)
+
+The Waveshare 2.8" LCD (A) has 4 onboard buttons. Default configuration (can be changed in `config.yaml`):
+
+| Button | GPIO Pin | Physical Pin | Function    |
+|--------|----------|--------------|-------------|
+| KEY1   | GPIO 4   | Pin 7        | Play/Pause  |
+| KEY2   | GPIO 23  | Pin 16       | Stop        |
+| KEY3   | GPIO 24  | Pin 18       | Next Track  |
+| KEY4   | GPIO 25  | Pin 22       | Previous    |
+
+The buttons are active-low with internal pull-ups configured in software.
 
 ## Installation
 
@@ -82,8 +97,8 @@ chmod +x install.sh
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd raspberry-pi-5-app
+   git clone <repository-url> raspisong-app
+   cd raspisong-app
    ```
 
 2. Update system and install dependencies:
@@ -122,26 +137,29 @@ screen:
   width: 240          # Display width
   height: 320         # Display height
   rotation: 0         # Rotation (0, 90, 180, 270)
+  spi_bus: 0          # SPI bus number
+  spi_device: 0       # SPI device (CE0)
+  spi_speed_hz: 32000000  # SPI clock speed
 
 vlc:
-  default_media_path: "/home/pi/media"  # Path to media files
+  default_media_path: "~/media"  # Path to media files (~ expands to user home)
   volume: 50          # Default volume (0-100)
   autoplay: false     # Auto-start playback on launch
 
 system:
-  update_interval: 1  # Display update interval in seconds
+  update_interval: 1  # Status logging interval in seconds
   display_info:
     cpu_usage: true
     memory_usage: true
     disk_space: true
 
 gpio:
+  # Waveshare 2.8" LCD (A) onboard button configuration
   buttons:
-    play: 17          # GPIO pin numbers
-    pause: 27
-    stop: 22
-    next: 23
-    previous: 24
+    play_pause: 4     # KEY1 - GPIO 4, Pin 7 (combined play/pause)
+    stop: 23          # KEY2 - GPIO 23, Pin 16
+    next: 24          # KEY3 - GPIO 24, Pin 18
+    previous: 25      # KEY4 - GPIO 25, Pin 22
 ```
 
 ## Usage
@@ -149,37 +167,23 @@ gpio:
 ### Running Manually
 
 ```bash
-cd raspberry-pi-5-app
+cd raspisong-app
+source .venv/bin/activate
 python3 src/main.py
 ```
 
 ### Running as a System Service
 
-1. Copy the service file:
-   ```bash
-   sudo cp rpi-lcd-monitor.service /etc/systemd/system/
-   ```
+The install script automatically sets up the systemd service with the correct user and paths.
 
-2. Update the paths in the service file if needed:
-   ```bash
-   sudo nano /etc/systemd/system/rpi-lcd-monitor.service
-   ```
-
-3. Enable and start the service:
-   ```bash
-   sudo systemctl enable rpi-lcd-monitor.service
-   sudo systemctl start rpi-lcd-monitor.service
-   ```
-
-4. Check service status:
-   ```bash
-   sudo systemctl status rpi-lcd-monitor.service
-   ```
-
-5. View logs:
-   ```bash
-   sudo journalctl -u rpi-lcd-monitor.service -f
-   ```
+Control the service with:
+```bash
+sudo systemctl start rpi-lcd-monitor    # Start now
+sudo systemctl stop rpi-lcd-monitor     # Stop
+sudo systemctl restart rpi-lcd-monitor  # Restart
+sudo systemctl status rpi-lcd-monitor   # Check status
+journalctl -u rpi-lcd-monitor -f        # View live logs
+```
 
 ### Adding Media Files
 
@@ -214,27 +218,39 @@ cp /path/to/your/media/* ~/media/
 ## Troubleshooting
 
 ### Display not working
-- Ensure SPI is enabled: `sudo raspi-config`
-- Check wiring connections
-- Verify display is detected: `ls /dev/spidev*`
-- Check logs for initialization errors
+- Ensure SPI is enabled: `sudo raspi-config nonint do_spi 0`
+- Verify display overlay is installed: check `/boot/firmware/config.txt` for `dtoverlay=waveshare28a-v2`
+- Verify display is detected: `ls /dev/spidev*` should show `/dev/spidev0.0` and `/dev/spidev0.1`
+- Check logs for initialization errors: `journalctl -u rpi-lcd-monitor -f`
 
 ### GPIO buttons not responding
-- Verify correct GPIO pin numbers in config
-- Check button wiring (button between GPIO and GND)
-- Ensure pull-up resistors are configured (handled in code)
-- Test with `gpio readall` command
+- Verify correct GPIO pin numbers in config.yaml
+- The onboard buttons use GPIO 4, 23, 24, 25
+- Ensure you're using gpiozero (not RPi.GPIO) for Pi 5 compatibility
+- Check button status: run `python3 src/input/gpio.py` to test buttons
+
+### Touchscreen not working
+- Check touch panel overlay in config.txt: `dtoverlay=ads7846,cs=1,penirq=17,...`
+- Verify touch device exists: `ls /dev/input/event*`
+- Run calibration: `DISPLAY=:0 xinput_calibrator`
+- Check evdev permissions: user must have access to /dev/input/event*
 
 ### VLC not playing
 - Ensure VLC is installed: `vlc --version`
-- Check media path in config.yaml
-- Verify media files exist and are readable
+- Check media path in config.yaml (supports `~` for home directory)
+- Verify media files exist: `ls ~/media/`
 - Check VLC logs for errors
 
+### Raspberry Pi 5 specific issues
+- `RuntimeError: Cannot determine SOC peripheral base address`: Use `gpiozero` with `lgpio` backend (this is the default in this project)
+- GPIO permission denied: `sudo usermod -aG gpio $USER`, then logout/login
+- SPI not working: Check `/boot/firmware/config.txt` has `dtparam=spi=on`
+- RPi.GPIO not working: Use gpiozero instead (RPi.GPIO is not compatible with Pi 5)
+
 ### Permission errors
-- Run with appropriate permissions
-- Add user to gpio group: `sudo usermod -a -G gpio $USER`
-- Add user to spi group: `sudo usermod -a -G spi $USER`
+- Add user to gpio group: `sudo usermod -aG gpio $USER`
+- Add user to spi group: `sudo usermod -aG spi $USER`
+- Add user to input group (for touch): `sudo usermod -aG input $USER`
 - Logout and login for group changes to take effect
 
 ## Contributing

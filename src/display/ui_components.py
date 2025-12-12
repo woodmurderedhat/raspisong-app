@@ -192,7 +192,10 @@ class Slider(UIComponent):
     @property
     def normalized_value(self):
         """Get value as 0-1 range."""
-        return (self.value - self.min_val) / (self.max_val - self.min_val)
+        range_val = self.max_val - self.min_val
+        if range_val == 0:
+            return 0
+        return (self.value - self.min_val) / range_val
 
     def draw(self, draw, font=None):
         """Draw the slider."""

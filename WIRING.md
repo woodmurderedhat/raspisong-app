@@ -23,12 +23,10 @@ PIN NO.  SYMBOL      GPIO        DESCRIPTION
 9        GND         -           Ground
 10       NC          -           Not connected
 11       TP_IRQ      GPIO 17     Touch panel interrupt
-12       PWM         GPIO 18     Backlight control (Rev2.1)
-13       RST         GPIO 27     LCD Reset (directly usable - NOT GPIO27!)
-                                 NOTE: Waveshare uses GPIO 13 for reset
+12       PWM         GPIO 18     Backlight control (PWM capable, Rev2.1)
+13       RST         GPIO 27     LCD Reset - NOTE: Code uses GPIO 13 per Waveshare spec
 14       GND         -           Ground
-15       LCD_RS      GPIO 22     LCD command/data selection (DC pin)
-                                 NOTE: Waveshare uses GPIO 15 for LCD_RS
+15       LCD_RS      GPIO 22     LCD DC (Data/Command) - NOTE: Code uses GPIO 15
 16       KEY2        GPIO 23     Button 2 (directly usable)
 17       3.3V        -           Power (3.3V input)
 18       KEY3        GPIO 24     Button 3 (directly usable)

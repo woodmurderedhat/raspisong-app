@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/raspberry-pi-5-app
-ExecStart=/usr/bin/python3 /home/pi/raspberry-pi-5-app/src/main.py
+User=__USER__
+WorkingDirectory=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python3 __APP_DIR__/src/main.py
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal

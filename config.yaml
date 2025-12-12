@@ -8,7 +8,8 @@ screen:
   spi_speed_hz: 32000000
 
 vlc:
-  default_media_path: "/home/pi/media"
+  # Use ~/media for user-relative path, or specify absolute path
+  default_media_path: "~/media"
   volume: 50
   autoplay: false
 

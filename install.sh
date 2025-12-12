@@ -135,6 +135,19 @@ mkdir -p ~/media
 echo "Setting permissions..."
 chmod +x src/main.py
 
+# Install systemd service
+echo ""
+echo "Installing systemd service..."
+# Substitute placeholders with current user and app directory
+CURRENT_USER=$(whoami)
+APP_DIR="$SCRIPT_DIR"
+sed -e "s|__USER__|$CURRENT_USER|g" -e "s|__APP_DIR__|$APP_DIR|g" \
+    rpi-lcd-monitor.service | sudo tee /etc/systemd/system/rpi-lcd-monitor.service > /dev/null
+sudo systemctl daemon-reload
+sudo systemctl enable rpi-lcd-monitor.service
+echo "Service installed for user '$CURRENT_USER' at '$APP_DIR'"
+echo "Service enabled (will start on boot)"
+
 echo ""
 echo "=========================================="
 echo "Installation complete!"
@@ -146,8 +159,13 @@ echo "Next steps:"
 echo "1. Reboot: sudo reboot"
 echo "2. Place your media files in ~/media/"
 echo "3. Edit config.yaml to customize settings"
-echo "4. Activate venv: source .venv/bin/activate"
-echo "5. Run the application: python3 src/main.py"
+echo ""
+echo "The app will start automatically on boot."
+echo "To manually control the service:"
+echo "  sudo systemctl start rpi-lcd-monitor    # Start now"
+echo "  sudo systemctl stop rpi-lcd-monitor     # Stop"
+echo "  sudo systemctl status rpi-lcd-monitor   # Check status"
+echo "  journalctl -u rpi-lcd-monitor -f        # View logs"
 echo ""
 echo "Waveshare 2.8\" LCD (A) Controls:"
 echo ""

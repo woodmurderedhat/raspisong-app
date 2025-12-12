@@ -132,8 +132,10 @@ class Config:
 
     @property
     def vlc_media_path(self):
-        """Get VLC default media path."""
-        return self.get('vlc', 'default_media_path', default='/home/pi/media')
+        """Get VLC default media path with ~ expansion."""
+        import os
+        path = self.get('vlc', 'default_media_path', default='/home/pi/media')
+        return os.path.expanduser(path)
 
     @property
     def vlc_volume(self):

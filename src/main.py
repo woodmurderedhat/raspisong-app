@@ -190,8 +190,12 @@ class MediaPlayerApp:
     def run(self):
         """Main application loop."""
         self.running = True
-        update_interval = self.config.update_interval
+        # Use a responsive update interval (0.1s) for smooth UI
+        # The config interval is used for status logging
+        display_interval = 0.1
+        status_interval = max(1, self.config.update_interval)
         loop_count = 0
+        status_loops = int(status_interval / display_interval)
 
         print("\n" + "=" * 50)
         print("Application started successfully!")
@@ -208,16 +212,16 @@ class MediaPlayerApp:
                 self.ui.render()
 
                 # Print status to console periodically
-                if loop_count % 30 == 0:  # Every ~3 seconds at 0.1s interval
+                if loop_count % (status_loops * 3) == 0:  # Every ~3 seconds
                     status = "Playing" if self.ui.is_playing else "Paused"
                     print(f"[{time.strftime('%H:%M:%S')}] {status} - {self.ui.current_track}")
 
                 loop_count += 1
-                time.sleep(update_interval)
+                time.sleep(display_interval)
 
             except Exception as e:
                 print(f"Error in main loop: {e}")
-                time.sleep(update_interval)
+                time.sleep(display_interval)
 
     def cleanup(self):
         """Clean up all resources."""

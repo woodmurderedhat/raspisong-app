@@ -27,6 +27,10 @@ class VLCController:
         self.player = self.instance.media_player_new()
         self.media_list = []
         self.current_index = 0
+
+        # Expand ~ to user home directory
+        if media_path:
+            media_path = os.path.expanduser(media_path)
         self.media_path = media_path
 
         if media_path and os.path.exists(media_path):
