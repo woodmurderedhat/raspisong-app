@@ -1,9 +1,24 @@
+"""
+VLC Player module providing basic media player interface.
+
+Dependencies:
+- python-vlc for VLC bindings
+
+Signals emitted: None
+Signals received: None
+"""
+
+import vlc
+
+
 class VLCPlayer:
+    """Simple VLC media player wrapper."""
+
     def __init__(self):
-        import vlc
         self.player = vlc.MediaPlayer()
 
     def load_media(self, media_path):
+        """Load a media file for playback."""
         media = vlc.Media(media_path)
         self.player.set_media(media)
 

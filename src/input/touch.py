@@ -137,6 +137,28 @@ class TouchHandler:
         """Remove all registered touch regions."""
         self.touch_regions.clear()
 
+    def _check_regions(self, x, y):
+        """
+        Check if touch point is within any registered region and call its callback.
+
+        Args:
+            x: Touch x coordinate
+            y: Touch y coordinate
+        """
+        for name, region in self.touch_regions.items():
+            rx, ry = region['x'], region['y']
+            rw, rh = region['width'], region['height']
+            if rx <= x < rx + rw and ry <= y < ry + rh:
+                callback = region.get('callback')
+                if callback:
+                    try:
+                        callback(name, x, y)
+                    except TypeError:
+                        # Callback may not accept arguments
+                        try:
+                            callback()
+                        except Exception as e:
+                            print(f"Region callback error: {e}")
 
     def _read_events(self):
         """Background thread to read touch events."""

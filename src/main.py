@@ -167,17 +167,21 @@ class MediaPlayerApp:
 
         status = self.vlc_controller.get_status()
 
-        # Update playing state
-        self.ui.set_playing(status['state'] == 'playing')
+        # Update playing state (compare case-insensitively)
+        state = status.get('state', '').lower()
+        self.ui.set_playing(state == 'playing')
 
         # Update track info
         track_name = status.get('current_track', 'No Track')
         self.ui.set_track_info(track_name if track_name != 'None' else 'No Track')
 
-        # Update progress
-        position = status.get('position', 0)
-        duration = status.get('duration', 0)
-        self.ui.set_progress(position, duration)
+        # Update progress (time and length are in milliseconds)
+        current_time_ms = status.get('time', 0)
+        total_time_ms = status.get('length', 0)
+        # Convert to seconds for display
+        current_time_sec = current_time_ms / 1000 if current_time_ms > 0 else 0
+        total_time_sec = total_time_ms / 1000 if total_time_ms > 0 else 0
+        self.ui.set_progress(current_time_sec, total_time_sec)
 
         # Update volume
         volume = status.get('volume', 50)

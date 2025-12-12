@@ -253,7 +253,7 @@ class Screen:
         """Draw text on the display at (x, y)."""
         try:
             font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_size)
-        except:
+        except Exception:
             font = self.font
 
         self.draw.text((x, y), text, font=font, fill=color)

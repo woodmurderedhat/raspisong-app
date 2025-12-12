@@ -163,7 +163,7 @@ class VLCController:
         """Get current volume level."""
         try:
             return self.player.audio_get_volume()
-        except:
+        except Exception:
             return 0
 
     def get_status(self):
@@ -203,7 +203,7 @@ class VLCController:
         """Check if media is currently playing."""
         try:
             return self.player.is_playing()
-        except:
+        except Exception:
             return False
 
     def cleanup(self):

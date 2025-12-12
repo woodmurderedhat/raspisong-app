@@ -148,6 +148,12 @@ class Button(UIComponent):
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
+        # Calculate centered position
+        tx = self.x + (self.width - text_width) // 2
+        ty = self.y + (self.height - text_height) // 2
+
+        # Draw the text
+        draw.text((tx, ty), text, fill=color, font=font)
 
     def handle_press(self, x, y):
         """Handle touch press on button."""
