@@ -3,14 +3,22 @@ VLC Controller module for media playback control.
 Provides interface to control VLC media player.
 
 Dependencies:
-- vlc.player module for VLC player instance
+- python-vlc for VLC bindings
+- VLC media player must be installed on the system
 
 Signals emitted: None (could be extended with EventBus)
 Signals received: None
 """
 
-import vlc
 import os
+
+try:
+    import vlc
+except ImportError as e:
+    raise ImportError(
+        "python-vlc is not installed. Install it with: pip install python-vlc\n"
+        f"Original error: {e}"
+    )
 
 
 class VLCController:
@@ -22,8 +30,33 @@ class VLCController:
 
         Args:
             media_path: Optional default media file or directory path
+
+        Raises:
+            RuntimeError: If VLC is not installed or cannot be initialized
         """
-        self.instance = vlc.Instance('--no-video-title-show', '--quiet')
+        # Check if vlc.Instance exists (requires VLC to be installed)
+        if not hasattr(vlc, 'Instance'):
+            raise RuntimeError(
+                "VLC media player is not installed or python-vlc cannot find it.\n"
+                "Please install VLC:\n"
+                "  - Windows: Download from https://www.videolan.org/vlc/\n"
+                "  - Linux: sudo apt-get install vlc libvlc-dev\n"
+                "  - macOS: brew install vlc"
+            )
+
+        try:
+            self.instance = vlc.Instance('--no-video-title-show', '--quiet')
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to create VLC instance: {e}\n"
+                "Ensure VLC media player is properly installed."
+            )
+
+        if self.instance is None:
+            raise RuntimeError(
+                "VLC Instance returned None. VLC may not be properly installed."
+            )
+
         self.player = self.instance.media_player_new()
         self.media_list = []
         self.current_index = 0

@@ -6,12 +6,19 @@ For full playlist and control features, use VLCController instead.
 
 Dependencies:
 - python-vlc for VLC bindings
+- VLC media player must be installed on the system
 
 Signals emitted: None
 Signals received: None
 """
 
-import vlc
+try:
+    import vlc
+except ImportError as e:
+    raise ImportError(
+        "python-vlc is not installed. Install it with: pip install python-vlc\n"
+        f"Original error: {e}"
+    )
 
 
 class VLCPlayer:
