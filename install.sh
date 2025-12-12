@@ -6,6 +6,9 @@
 
 set -e  # Exit on error
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "=========================================="
 echo "Raspberry Pi 5 LCD App Installation"
 echo "Waveshare 2.8\" LCD (A) Driver Setup"
@@ -109,7 +112,7 @@ else
 fi
 
 # Return to script directory
-cd "$(dirname "$0")"
+cd "$SCRIPT_DIR"
 
 # Create virtual environment (recommended for Bookworm)
 echo ""
