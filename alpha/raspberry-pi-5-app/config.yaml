@@ -1,0 +1,30 @@
+screen:
+  width: 240
+  height: 320
+  rotation: 0
+  # Waveshare 2.8" LCD (A) SPI Configuration
+  spi_bus: 0
+  spi_device: 0
+  spi_speed_hz: 32000000
+
+vlc:
+  default_media_path: "/home/pi/media"
+  volume: 50
+  autoplay: false
+
+system:
+  update_interval: 1
+  display_info:
+    cpu_usage: true
+    memory_usage: true
+    disk_space: true
+
+gpio:
+  # Waveshare 2.8" LCD (A) onboard button configuration
+  # These are the 4 buttons on the LCD board itself
+  # KEY1=GPIO4(pin7), KEY2=GPIO23(pin16), KEY3=GPIO24(pin18), KEY4=GPIO25(pin22)
+  buttons:
+    play_pause: 4   # KEY1 - GPIO 4, Physical Pin 7
+    stop: 23        # KEY2 - GPIO 23, Physical Pin 16
+    next: 24        # KEY3 - GPIO 24, Physical Pin 18 (Rev2.1 uses this for PWM backlight)
+    previous: 25    # KEY4 - GPIO 25, Physical Pin 22

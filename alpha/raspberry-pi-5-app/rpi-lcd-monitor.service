@@ -1,0 +1,17 @@
+[Unit]
+Description=Raspberry Pi LCD System Monitor and VLC Controller
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/raspberry-pi-5-app
+ExecStart=/usr/bin/python3 /home/pi/raspberry-pi-5-app/src/main.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

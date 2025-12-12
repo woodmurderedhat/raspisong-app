@@ -1,0 +1,29 @@
+# Raspberry Pi 5 Compatible Requirements
+# Updated for Bookworm/Trixie and Raspberry Pi 5
+# Waveshare 2.8" LCD (A) with touch support
+
+# System monitoring
+psutil>=5.9.0
+
+# GPIO handling (Raspberry Pi 5 compatible)
+gpiozero>=2.0
+lgpio>=0.2.2.0
+
+# Note: RPi.GPIO is NOT compatible with Raspberry Pi 5
+# Use rpi-lgpio as a drop-in replacement if needed
+# rpi-lgpio
+
+# Touch input handling (evdev for ADS7846 touchscreen)
+evdev>=1.6.0
+
+# VLC media player bindings
+python-vlc>=3.0.18
+
+# Image handling for display
+Pillow>=10.0.0
+
+# Configuration
+pyyaml>=6.0
+
+# SPI communication for display
+spidev>=3.6
